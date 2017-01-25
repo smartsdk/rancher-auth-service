@@ -130,6 +130,7 @@ func (g *GProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 		userAcct.toIdentity(UserType, &userIdentity)
 		identities = append(identities, userIdentity)
 	}
+	/*
 	orgAccts, err := g.githubClient.getGithubOrgs(accessToken)
 	if err == nil {
 		for _, orgAcct := range orgAccts {
@@ -150,6 +151,7 @@ func (g *GProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 			identities = append(identities, teamIdentity)
 		}
 	}
+	*/
 
 	return identities, nil
 }
@@ -171,7 +173,7 @@ func (g *GProvider) GetIdentity(externalID string, externalIDType string, access
 		githubAcct.toIdentity(externalIDType, &identity)
 		return identity, nil
 	case TeamType:
-		githubAcct, err := g.githubClient.getTeamByID(externalID, accessToken)
+		githubAcct, err := g.githubClient.getUserOrgByID(externalID, accessToken)
 		if err != nil {
 			return identity, err
 		}
@@ -196,7 +198,7 @@ func (g *GProvider) SearchIdentities(name string, exactMatch bool, accessToken s
 
 		identities = append(identities, userIdentity)
 	}
-
+	/*
 	orgAcct, err := g.githubClient.getGithubOrgByName(name, accessToken)
 	if err == nil {
 		orgIdentity := client.Identity{Resource: client.Resource{
@@ -206,6 +208,7 @@ func (g *GProvider) SearchIdentities(name string, exactMatch bool, accessToken s
 
 		identities = append(identities, orgIdentity)
 	}
+	*/
 
 	return identities, nil
 }
@@ -290,7 +293,7 @@ func (g *GProvider) GetRedirectURL() string {
 	} else {
 		redirect = githubDefaultHostName
 	}
-	redirect = redirect + "/login/oauth/authorize?client_id=" + g.githubClient.config.ClientID + "&scope=read:org"
+	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.githubClient.config.ClientID + "&redirect_uri="+ g.githubClient.config.Scheme
 
 	return redirect
 }

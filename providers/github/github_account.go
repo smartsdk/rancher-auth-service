@@ -10,7 +10,7 @@ import (
 type Account struct {
 	ID        int    `json:"id,omitempty"`
 	Login     string `json:"login,omitempty"`
-	Name      string `json:"name,omitempty"`
+	Name      string `json:"displayName,omitempty"`
 	AvatarURL string `json:"avatar_url,omitempty"`
 	HTMLURL   string `json:"html_url,omitempty"`
 }
