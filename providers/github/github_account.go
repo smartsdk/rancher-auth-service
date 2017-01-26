@@ -3,12 +3,12 @@ package github
 import (
 	"fmt"
 	"github.com/rancher/go-rancher/client"
-	"strconv"
+	//"strconv"
 )
 
 //Account defines properties an account on github has
 type Account struct {
-	ID        int    `json:"id,omitempty"`
+	ID        string    `json:"id,omitempty"`
 	Login     string `json:"login,omitempty"`
 	Name      string `json:"displayName,omitempty"`
 	AvatarURL string `json:"avatar_url,omitempty"`
@@ -16,8 +16,10 @@ type Account struct {
 }
 
 func (a *Account) toIdentity(externalIDType string, identity *client.Identity) {
-	identity.ExternalId = strconv.Itoa(a.ID)
-	identity.Resource.Id = externalIDType + ":" + strconv.Itoa(a.ID)
+	//identity.ExternalId = strconv.Itoa(a.ID)
+	identity.ExternalId = a.ID
+	//identity.Resource.Id = externalIDType + ":" + strconv.Itoa(a.ID)
+	identity.Resource.Id = externalIDType + ":" + a.ID
 	identity.ExternalIdType = externalIDType
 	if a.Name != "" {
 		identity.Name = a.Name
@@ -31,7 +33,7 @@ func (a *Account) toIdentity(externalIDType string, identity *client.Identity) {
 
 //Team defines properties a team on github has
 type Team struct {
-	ID           int                    `json:"id,omitempty"`
+	ID           string                    `json:"id,omitempty"`
 	Organization map[string]interface{} `json:"organization,omitempty"`
 	Name         string                 `json:"name,omitempty"`
 	Slug         string                 `json:"slug,omitempty"`
