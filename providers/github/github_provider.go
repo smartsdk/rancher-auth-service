@@ -293,7 +293,7 @@ func (g *GProvider) GetRedirectURL() string {
 	} else {
 		redirect = githubDefaultHostName
 	}
-	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.githubClient.config.ClientID + "&redirect_uri="+ g.githubClient.config.Scheme
+	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.githubClient.config.ClientID
 
 	return redirect
 }

@@ -35,7 +35,7 @@ func (g *GClient) getAccessToken(code string) (string, error) {
 	form.Add("client_secret", g.config.ClientSecret)
 	form.Add("code", code)
 	form.Add("grant_type", "authorization_code")
-	form.Add("redirect_uri", g.config.Scheme)
+	//form.Add("redirect_uri", g.config.RedirectURI)
 
 	url := g.getURL("TOKEN")
 
@@ -385,7 +385,7 @@ func (g *GClient) getFromGithub(githubAccessToken string, url string) (*http.Res
 		log.Error(err)
 	}
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36)")
+	//req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36)")
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		log.Errorf("Received error from github: %v", err)
