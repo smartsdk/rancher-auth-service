@@ -64,6 +64,7 @@ func (g *GProvider) GenerateToken(json map[string]string) (model.Token, error) {
 		log.Debugf("GitHubIdentityProvider GenerateToken called for securityCode %v", securityCode)
 		accessToken, err := g.githubClient.getAccessToken(securityCode)
 		if err != nil {
+			log.Errorf("Error with %v", securityCode)
 			log.Errorf("Error generating accessToken from github %v", err)
 			return model.Token{}, err
 		}
