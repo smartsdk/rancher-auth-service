@@ -45,6 +45,7 @@ func (g *GClient) getAccessToken(code string) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+	log.Errorf("Received resp to getAccessCode: %v", resp)
 
 	// Decode the response
 	var respMap map[string]interface{}
@@ -82,7 +83,8 @@ func (g *GClient) getGithubUser(githubAccessToken string) (Account, error) {
 	}
 	defer resp.Body.Close()
 	var githubAcct Account
-
+	
+	log.Errorf("Received resp to getGithubUser: %v", resp)
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Github getGithubUser: error reading response, err: %v", err)
@@ -361,6 +363,7 @@ func (g *GClient) postToGithub(url string, form url.Values) (*http.Response, err
 	req.Header.Add("Authorization", "Basic "+auth)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Accept", "application/json")
+	log.Error("Doing post request: %v", req)
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		log.Errorf("Received error from github: %v", err)
@@ -385,7 +388,8 @@ func (g *GClient) getFromGithub(githubAccessToken string, url string) (*http.Res
 		log.Error(err)
 	}
 	req.Header.Add("Accept", "application/json")
-	//req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36)")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36)")
+	log.Errorf("Doing get request: %v", req)
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		log.Errorf("Received error from github: %v", err)
