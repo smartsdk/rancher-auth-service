@@ -35,7 +35,7 @@ func (g *GClient) getAccessToken(code string) (string, error) {
 	form.Add("client_secret", g.config.ClientSecret)
 	form.Add("code", code)
 	form.Add("grant_type", "authorization_code")
-	form.Add("redirect_uri", g.config.RedirectURI)
+	form.Add("redirect_uri", g.config.Scheme)
 
 	url := g.getURL("TOKEN")
 
