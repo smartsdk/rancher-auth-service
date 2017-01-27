@@ -20,6 +20,7 @@ const (
 	schemeSetting                  = "api.github.scheme"
 	clientIDSetting                = "api.auth.github.client.id"
 	clientSecretSetting            = "api.auth.github.client.secret"
+	redirectURISetting            = "api.auth.github.redirectURI"
 	githubAccessModeSetting        = "api.auth.github.access.mode"
 	githubAllowedIdentitiesSetting = "api.auth.github.allowed.identities"
 )
@@ -250,6 +251,7 @@ func (g *GProvider) GetSettings() map[string]string {
 	if g.githubClient.config.ClientSecret != "" {
 		settings[clientSecretSetting] = g.githubClient.config.ClientSecret
 	}
+	settings[redirectURISetting] = g.githubClient.config.RedirectURI
 	return settings
 }
 
@@ -262,6 +264,7 @@ func (g *GProvider) GetProviderSettingList(listOnly bool) []string {
 	if !listOnly {
 		settings = append(settings, clientSecretSetting)
 	}
+	settings = append(settings, redirectURISetting)
 	return settings
 }
 
@@ -274,6 +277,7 @@ func (g *GProvider) AddProviderConfig(authConfig *model.AuthConfig, providerSett
 	githubConfig.Scheme = providerSettings[schemeSetting]
 	githubConfig.ClientID = providerSettings[clientIDSetting]
 	githubConfig.ClientSecret = providerSettings[clientSecretSetting]
+	githubConfig.RedirectURI = providerSettings[redirectURISetting]
 
 	authConfig.GithubConfig = githubConfig
 }
