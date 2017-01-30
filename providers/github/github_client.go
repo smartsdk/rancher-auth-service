@@ -413,8 +413,10 @@ func (g *GClient) getURL(endpoint string) string {
 	var hostName, apiEndpoint, toReturn string
 
 	if g.config.Hostname != "" {
-		hostName = g.config.Scheme + g.config.Hostname
-		apiEndpoint = g.config.Scheme + g.config.Hostname + gheAPI
+		//hostName = g.config.Scheme + g.config.Hostname
+		//apiEndpoint = g.config.Scheme + g.config.Hostname + gheAPI
+		hostName = githubDefaultHostName
+		apiEndpoint = githubAPI
 	} else {
 		hostName = githubDefaultHostName
 		apiEndpoint = githubAPI

@@ -294,11 +294,12 @@ func (g *GProvider) GetLegacySettings() map[string]string {
 func (g *GProvider) GetRedirectURL() string {
 	redirect := ""
 	if g.githubClient.config.Hostname != "" {
-		redirect = g.githubClient.config.Scheme + g.githubClient.config.Hostname
+		//redirect = g.githubClient.config.Scheme + g.githubClient.config.Hostname
+		redirect = githubDefaultHostName
 	} else {
 		redirect = githubDefaultHostName
 	}
-	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.githubClient.config.ClientID + "&redirect_uri=" + g.githubClient.config.Scheme
+	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.githubClient.config.ClientID + "&redirect_uri=" + g.githubClient.config.Hostname
 
 	return redirect
 }
