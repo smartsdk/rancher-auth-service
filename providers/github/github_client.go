@@ -297,6 +297,8 @@ func (g *GClient) getGithubOrgByName(org string, githubAccessToken string) (Acco
 
 func (g *GClient) getUserOrgByID(id string, githubAccessToken string) (Account, error) {
 
+	return Account{ID: id, Login: id, Name: id, AvatarURL: "", HTMLURL: ""}, nil
+
 	url := g.getURL("USER_INFO") + "/" + id
 
 	resp, err := g.getFromGithub(githubAccessToken, url)

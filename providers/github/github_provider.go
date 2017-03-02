@@ -20,7 +20,7 @@ const (
 	schemeSetting                  = "api.github.scheme"
 	clientIDSetting                = "api.auth.github.client.id"
 	clientSecretSetting            = "api.auth.github.client.secret"
-	redirectURISetting            = "api.auth.github.redirectURI"
+	redirectURISetting             = "api.auth.github.redirectURI"
 	githubAccessModeSetting        = "api.auth.github.access.mode"
 	githubAllowedIdentitiesSetting = "api.auth.github.allowed.identities"
 )
