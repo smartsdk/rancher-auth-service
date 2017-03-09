@@ -242,6 +242,8 @@ func (g *GClient) getGithubUserByName(username string, githubAccessToken string)
 		return Account{}, fmt.Errorf("There is a org by this name, not looking fo the user entity by name %v", username)
 	}
 	*/
+	
+	return Account{ID: username, Login: username, Name: username, AvatarURL: "", HTMLURL: ""}, nil
 
 	username = URLEncoded(username)
 	url := g.getURL("USERS") + username
