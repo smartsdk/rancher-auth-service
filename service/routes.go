@@ -42,6 +42,10 @@ func NewRouter() *mux.Router {
 	identity.CollectionMethods = []string{"GET"}
 	identity.ResourceMethods = []string{"GET"}
 	identity.PluralName = "identities"
+	
+	// FiwareConfig
+	fiwareconfig := schemas.AddType("fiwareconfig", model.FiwareConfig{})
+	fiwareconfig.CollectionMethods = []string{}
 
 	// GithubConfig
 	githubconfig := schemas.AddType("githubconfig", model.GithubConfig{})

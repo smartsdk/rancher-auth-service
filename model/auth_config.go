@@ -9,6 +9,7 @@ type AuthConfig struct {
 	Enabled           bool              `json:"enabled"`
 	AccessMode        string            `json:"accessMode"`
 	AllowedIdentities []client.Identity `json:"allowedIdentities"`
+	FiwareConfig      FiwareConfig      `json:"fiwareConfig"`
 	GithubConfig      GithubConfig      `json:"githubConfig"`
 	ShibbolethConfig  ShibbolethConfig  `json:"shibbolethConfig"`
 }
