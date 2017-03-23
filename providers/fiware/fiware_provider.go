@@ -29,34 +29,34 @@ func init() {
 }
 
 //InitializeProvider returns a new instance of the provider
-func InitializeProvider() *GProvider {
+func InitializeProvider() *FProvider {
 	client := &http.Client{}
 	fiwareClient := &FClient{}
 	fiwareClient.httpClient = client
 
-	fiwareProvider := &GProvider{}
+	fiwareProvider := &FProvider{}
 	fiwareProvider.fiwareClient = fiwareClient
 
 	return fiwareProvider
 }
 
-//GProvider implements an IdentityProvider for fiware
-type GProvider struct {
+//FProvider implements an IdentityProvider for fiware
+type FProvider struct {
 	fiwareClient *FClient
 }
 
 //GetName returns the name of the provider
-func (g *GProvider) GetName() string {
+func (g *FProvider) GetName() string {
 	return Name
 }
 
 //GetUserType returns the string used to identify a user account for this provider
-func (g *GProvider) GetUserType() string {
+func (g *FProvider) GetUserType() string {
 	return UserType
 }
 
 //GenerateToken authenticates the given code and returns the token
-func (g *GProvider) GenerateToken(json map[string]string) (model.Token, error) {
+func (g *FProvider) GenerateToken(json map[string]string) (model.Token, error) {
 	//getAccessToken
 	securityCode := json["code"]
 	accessToken := json["accessToken"]
@@ -78,7 +78,7 @@ func (g *GProvider) GenerateToken(json map[string]string) (model.Token, error) {
 	}
 }
 
-func (g *GProvider) createToken(accessToken string) (model.Token, error) {
+func (g *FProvider) createToken(accessToken string) (model.Token, error) {
 	var token = model.Token{Resource: client.Resource{
 		Type: "token",
 	}}
@@ -111,7 +111,7 @@ func GetUserIdentity(identities []client.Identity, userType string) (client.Iden
 }
 
 //RefreshToken re-authenticates and generate a new token
-func (g *GProvider) RefreshToken(json map[string]string) (model.Token, error) {
+func (g *FProvider) RefreshToken(json map[string]string) (model.Token, error) {
 	accessToken := json["accessToken"]
 	if accessToken != "" {
 		log.Debugf("GitHubIdentityProvider RefreshToken called for accessToken %v", accessToken)
@@ -121,7 +121,7 @@ func (g *GProvider) RefreshToken(json map[string]string) (model.Token, error) {
 }
 
 //GetIdentities returns list of user and group identities associated to this token
-func (g *GProvider) GetIdentities(accessToken string) ([]client.Identity, error) {
+func (g *FProvider) GetIdentities(accessToken string) ([]client.Identity, error) {
 	var identities []client.Identity
 
 	userAcct, err := g.fiwareClient.getFiwareUser(accessToken)
@@ -159,7 +159,7 @@ func (g *GProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 }
 
 //GetIdentity returns the identity by externalID and externalIDType
-func (g *GProvider) GetIdentity(externalID string, externalIDType string, accessToken string) (client.Identity, error) {
+func (g *FProvider) GetIdentity(externalID string, externalIDType string, accessToken string) (client.Identity, error) {
 	identity := client.Identity{Resource: client.Resource{
 		Type: "identity",
 	}}
@@ -188,7 +188,7 @@ func (g *GProvider) GetIdentity(externalID string, externalIDType string, access
 }
 
 //SearchIdentities returns the identity by name
-func (g *GProvider) SearchIdentities(name string, exactMatch bool, accessToken string) ([]client.Identity, error) {
+func (g *FProvider) SearchIdentities(name string, exactMatch bool, accessToken string) ([]client.Identity, error) {
 	var identities []client.Identity
 
 	userAcct, err := g.fiwareClient.getFiwareUserByName(name, accessToken)
@@ -216,14 +216,14 @@ func (g *GProvider) SearchIdentities(name string, exactMatch bool, accessToken s
 }
 
 //LoadConfig initializes the provider with the passes config
-func (g *GProvider) LoadConfig(authConfig *model.AuthConfig) error {
+func (g *FProvider) LoadConfig(authConfig *model.AuthConfig) error {
 	configObj := authConfig.FiwareConfig
 	g.fiwareClient.config = &configObj
 	return nil
 }
 
 //GetConfig returns the provider config
-func (g *GProvider) GetConfig() model.AuthConfig {
+func (g *FProvider) GetConfig() model.AuthConfig {
 	log.Debug("In fiware getConfig")
 
 	authConfig := model.AuthConfig{Resource: client.Resource{
@@ -242,7 +242,7 @@ func (g *GProvider) GetConfig() model.AuthConfig {
 }
 
 //GetSettings transforms the provider config to db settings
-func (g *GProvider) GetSettings() map[string]string {
+func (g *FProvider) GetSettings() map[string]string {
 	settings := make(map[string]string)
 
 	settings[hostnameSetting] = g.fiwareClient.config.Hostname
@@ -256,7 +256,7 @@ func (g *GProvider) GetSettings() map[string]string {
 }
 
 //GetProviderSettingList returns the provider specific db setting list
-func (g *GProvider) GetProviderSettingList(listOnly bool) []string {
+func (g *FProvider) GetProviderSettingList(listOnly bool) []string {
 	var settings []string
 	settings = append(settings, hostnameSetting)
 	settings = append(settings, schemeSetting)
@@ -269,7 +269,7 @@ func (g *GProvider) GetProviderSettingList(listOnly bool) []string {
 }
 
 //AddProviderConfig adds the provider config into the generic config using the settings from db
-func (g *GProvider) AddProviderConfig(authConfig *model.AuthConfig, providerSettings map[string]string) {
+func (g *FProvider) AddProviderConfig(authConfig *model.AuthConfig, providerSettings map[string]string) {
 	fiwareConfig := model.FiwareConfig{Resource: client.Resource{
 		Type: "fiwareconfig",
 	}}
@@ -283,7 +283,7 @@ func (g *GProvider) AddProviderConfig(authConfig *model.AuthConfig, providerSett
 }
 
 //GetLegacySettings returns the provider specific legacy db settings
-func (g *GProvider) GetLegacySettings() map[string]string {
+func (g *FProvider) GetLegacySettings() map[string]string {
 	settings := make(map[string]string)
 	settings["accessModeSetting"] = fiwareAccessModeSetting
 	settings["allowedIdentitiesSetting"] = fiwareAllowedIdentitiesSetting
@@ -291,7 +291,7 @@ func (g *GProvider) GetLegacySettings() map[string]string {
 }
 
 //GetRedirectURL returns the provider specific redirect URL used by UI
-func (g *GProvider) GetRedirectURL() string {
+func (g *FProvider) GetRedirectURL() string {
 	redirect := ""
 	if g.fiwareClient.config.Hostname != "" {
 		//redirect = g.fiwareClient.config.Scheme + g.fiwareClient.config.Hostname
@@ -305,6 +305,6 @@ func (g *GProvider) GetRedirectURL() string {
 }
 
 //GetIdentitySeparator returns the provider specific separator to use to separate allowedIdentities
-func (g *GProvider) GetIdentitySeparator() string {
+func (g *FProvider) GetIdentitySeparator() string {
 	return ","
 }
