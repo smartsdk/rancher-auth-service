@@ -16,13 +16,13 @@ const (
 	UserType                       = Name + "_user"
 	OrgType                        = Name + "_org"
 	TeamType                       = Name + "_team"
-	hostnameSetting                = "api.github.domain"
-	schemeSetting                  = "api.github.scheme"
-	clientIDSetting                = "api.auth.github.client.id"
-	clientSecretSetting            = "api.auth.github.client.secret"
-	redirectURISetting             = "api.auth.github.redirectURI"
-	fiwareAccessModeSetting        = "api.auth.github.access.mode"
-	fiwareAllowedIdentitiesSetting = "api.auth.github.allowed.identities"
+	hostnameSetting                = "api.fiware.domain"
+	schemeSetting                  = "api.fiware.scheme"
+	clientIDSetting                = "api.auth.fiware.client.id"
+	clientSecretSetting            = "api.auth.fiware.client.secret"
+	redirectURISetting             = "api.auth.fiware.redirectURI"
+	fiwareAccessModeSetting        = "api.auth.fiware.access.mode"
+	fiwareAllowedIdentitiesSetting = "api.auth.fiware.allowed.identities"
 )
 
 func init() {
