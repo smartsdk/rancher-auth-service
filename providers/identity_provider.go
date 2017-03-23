@@ -3,7 +3,7 @@ package providers
 import (
 	"github.com/rancher/go-rancher/client"
 	"github.com/rancher/rancher-auth-service/model"
-	//"github.com/rancher/rancher-auth-service/providers/github"
+	"github.com/rancher/rancher-auth-service/providers/github"
 	"github.com/rancher/rancher-auth-service/providers/fiware"
 	"github.com/rancher/rancher-auth-service/providers/shibboleth"
 )
@@ -33,7 +33,7 @@ func GetProvider(name string) IdentityProvider {
 	case "fiwareconfig":
 		return fiware.InitializeProvider()
 	case "githubconfig":
-		return fiware.InitializeProvider()	
+		return github.InitializeProvider()	
 	case "shibbolethconfig":
 		return shibboleth.InitializeProvider()
 	default:
