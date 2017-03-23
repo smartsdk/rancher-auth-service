@@ -23,13 +23,13 @@ const (
 	fiwareDefaultHostName = "https://account.lab.fiware.org"
 )
 
-//GClient implements a httpclient for fiware
-type GClient struct {
+//FClient implements a httpclient for fiware
+type FClient struct {
 	httpClient *http.Client
 	config     *model.FiwareConfig
 }
 
-func (g *GClient) getAccessToken(code string) (string, error) {
+func (g *FClient) getAccessToken(code string) (string, error) {
 	form := url.Values{}
 	form.Add("client_id", g.config.ClientID)
 	form.Add("client_secret", g.config.ClientSecret)
@@ -73,7 +73,7 @@ func (g *GClient) getAccessToken(code string) (string, error) {
 	return acessToken, nil
 }
 
-func (g *GClient) getFiwareUser(fiwareAccessToken string) (Account, error) {
+func (g *FClient) getFiwareUser(fiwareAccessToken string) (Account, error) {
 
 	url := g.getURL("USER_INFO")
 	resp, err := g.getFromFiware(fiwareAccessToken, url)
@@ -99,7 +99,7 @@ func (g *GClient) getFiwareUser(fiwareAccessToken string) (Account, error) {
 	return fiwareAcct, nil
 }
 
-func (g *GClient) getFiwareOrgs(fiwareAccessToken string) ([]Account, error) {
+func (g *FClient) getFiwareOrgs(fiwareAccessToken string) ([]Account, error) {
 	var orgs []Account
 	url := g.getURL("ORG_INFO")
 	responses, err := g.paginateFiware(fiwareAccessToken, url)
@@ -128,7 +128,7 @@ func (g *GClient) getFiwareOrgs(fiwareAccessToken string) ([]Account, error) {
 	return orgs, nil
 }
 
-func (g *GClient) getFiwareTeams(fiwareAccessToken string) ([]Account, error) {
+func (g *FClient) getFiwareTeams(fiwareAccessToken string) ([]Account, error) {
 	var teams []Account
 	url := g.getURL("TEAMS")
 	responses, err := g.paginateFiware(fiwareAccessToken, url)
@@ -152,7 +152,7 @@ func (g *GClient) getFiwareTeams(fiwareAccessToken string) ([]Account, error) {
 	return teams, nil
 }
 
-func (g *GClient) getTeamInfo(response *http.Response) ([]Account, error) {
+func (g *FClient) getTeamInfo(response *http.Response) ([]Account, error) {
 	var teams []Account
 	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -174,7 +174,7 @@ func (g *GClient) getTeamInfo(response *http.Response) ([]Account, error) {
 	return teams, nil
 }
 
-func (g *GClient) getTeamByID(id string, fiwareAccessToken string) (Account, error) {
+func (g *FClient) getTeamByID(id string, fiwareAccessToken string) (Account, error) {
 	var teamAcct Account
 	url := g.getURL("TEAM") + id
 	response, err := g.getFromFiware(fiwareAccessToken, url)
@@ -198,7 +198,7 @@ func (g *GClient) getTeamByID(id string, fiwareAccessToken string) (Account, err
 	return teamAcct, nil
 }
 
-func (g *GClient) paginateFiware(fiwareAccessToken string, url string) ([]*http.Response, error) {
+func (g *FClient) paginateFiware(fiwareAccessToken string, url string) ([]*http.Response, error) {
 	var responses []*http.Response
 
 	response, err := g.getFromFiware(fiwareAccessToken, url)
@@ -219,7 +219,7 @@ func (g *GClient) paginateFiware(fiwareAccessToken string, url string) ([]*http.
 	return responses, nil
 }
 
-func (g *GClient) nextFiwarePage(response *http.Response) string {
+func (g *FClient) nextFiwarePage(response *http.Response) string {
 	header := response.Header.Get("link")
 
 	if header != "" {
@@ -234,7 +234,7 @@ func (g *GClient) nextFiwarePage(response *http.Response) string {
 	return ""
 }
 
-func (g *GClient) getFiwareUserByName(username string, fiwareAccessToken string) (Account, error) {
+func (g *FClient) getFiwareUserByName(username string, fiwareAccessToken string) (Account, error) {
 	
 	/*
 	_, err := g.getFiwareOrgByName(username, fiwareAccessToken)
@@ -270,7 +270,7 @@ func (g *GClient) getFiwareUserByName(username string, fiwareAccessToken string)
 	return fiwareAcct, nil
 }
 
-func (g *GClient) getFiwareOrgByName(org string, fiwareAccessToken string) (Account, error) {
+func (g *FClient) getFiwareOrgByName(org string, fiwareAccessToken string) (Account, error) {
 
 	org = URLEncoded(org)
 	url := g.getURL("ORGS") + org
@@ -297,7 +297,7 @@ func (g *GClient) getFiwareOrgByName(org string, fiwareAccessToken string) (Acco
 	return fiwareAcct, nil
 }
 
-func (g *GClient) getUserOrgByID(id string, fiwareAccessToken string) (Account, error) {
+func (g *FClient) getUserOrgByID(id string, fiwareAccessToken string) (Account, error) {
 
 	return Account{ID: id, Login: id, Name: id, AvatarURL: "", HTMLURL: ""}, nil
 
@@ -357,7 +357,7 @@ func URLEncoded(str string) string {
 	return u.String()
 }
 
-func (g *GClient) postToFiware(url string, form url.Values) (*http.Response, error) {
+func (g *FClient) postToFiware(url string, form url.Values) (*http.Response, error) {
 	req, err := http.NewRequest("POST", url, strings.NewReader(form.Encode()))
 	if err != nil {
 		log.Error(err)
@@ -386,7 +386,7 @@ func (g *GClient) postToFiware(url string, form url.Values) (*http.Response, err
 	return resp, nil
 }
 
-func (g *GClient) getFromFiware(fiwareAccessToken string, url string) (*http.Response, error) {
+func (g *FClient) getFromFiware(fiwareAccessToken string, url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url+"?access_token="+fiwareAccessToken, nil)
 	if err != nil {
 		log.Error(err)
@@ -412,7 +412,7 @@ func (g *GClient) getFromFiware(fiwareAccessToken string, url string) (*http.Res
 	return resp, nil
 }
 
-func (g *GClient) getURL(endpoint string) string {
+func (g *FClient) getURL(endpoint string) string {
 
 	var hostName, apiEndpoint, toReturn string
 

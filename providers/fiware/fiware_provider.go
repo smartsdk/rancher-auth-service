@@ -31,7 +31,7 @@ func init() {
 //InitializeProvider returns a new instance of the provider
 func InitializeProvider() *GProvider {
 	client := &http.Client{}
-	fiwareClient := &GClient{}
+	fiwareClient := &FClient{}
 	fiwareClient.httpClient = client
 
 	fiwareProvider := &GProvider{}
@@ -42,7 +42,7 @@ func InitializeProvider() *GProvider {
 
 //GProvider implements an IdentityProvider for fiware
 type GProvider struct {
-	fiwareClient *GClient
+	fiwareClient *FClient
 }
 
 //GetName returns the name of the provider
