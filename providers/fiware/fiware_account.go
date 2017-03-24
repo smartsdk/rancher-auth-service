@@ -3,7 +3,6 @@ package fiware
 import (
 	"fmt"
 	"github.com/rancher/go-rancher/client"
-	//"strconv"
 )
 
 //Account defines properties an account on fiware has
@@ -16,9 +15,7 @@ type Account struct {
 }
 
 func (a *Account) toIdentity(externalIDType string, identity *client.Identity) {
-	//identity.ExternalId = strconv.Itoa(a.ID)
 	identity.ExternalId = a.ID
-	//identity.Resource.Id = externalIDType + ":" + strconv.Itoa(a.ID)
 	identity.Resource.Id = externalIDType + ":" + a.ID
 	identity.ExternalIdType = externalIDType
 	if a.Name != "" {

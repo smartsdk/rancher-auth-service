@@ -132,28 +132,6 @@ func (g *FProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 		userAcct.toIdentity(UserType, &userIdentity)
 		identities = append(identities, userIdentity)
 	}
-	/*
-	orgAccts, err := g.fiwareClient.getFiwareOrgs(accessToken)
-	if err == nil {
-		for _, orgAcct := range orgAccts {
-			orgIdentity := client.Identity{Resource: client.Resource{
-				Type: "identity",
-			}}
-			orgAcct.toIdentity(OrgType, &orgIdentity)
-			identities = append(identities, orgIdentity)
-		}
-	}
-	teamAccts, err := g.fiwareClient.getFiwareTeams(accessToken)
-	if err == nil {
-		for _, teamAcct := range teamAccts {
-			teamIdentity := client.Identity{Resource: client.Resource{
-				Type: "identity",
-			}}
-			teamAcct.toIdentity(TeamType, &teamIdentity)
-			identities = append(identities, teamIdentity)
-		}
-	}
-	*/
 
 	return identities, nil
 }
@@ -168,13 +146,6 @@ func (g *FProvider) GetIdentity(externalID string, externalIDType string, access
 	case UserType:
 		fallthrough
 	case OrgType:
-		fiwareAcct, err := g.fiwareClient.getUserOrgByID(externalID, accessToken)
-		if err != nil {
-			return identity, err
-		}
-		fiwareAcct.toIdentity(externalIDType, &identity)
-		return identity, nil
-	case TeamType:
 		fiwareAcct, err := g.fiwareClient.getUserOrgByID(externalID, accessToken)
 		if err != nil {
 			return identity, err
@@ -200,17 +171,6 @@ func (g *FProvider) SearchIdentities(name string, exactMatch bool, accessToken s
 
 		identities = append(identities, userIdentity)
 	}
-	/*
-	orgAcct, err := g.fiwareClient.getFiwareOrgByName(name, accessToken)
-	if err == nil {
-		orgIdentity := client.Identity{Resource: client.Resource{
-			Type: "identity",
-		}}
-		orgAcct.toIdentity(OrgType, &orgIdentity)
-
-		identities = append(identities, orgIdentity)
-	}
-	*/
 
 	return identities, nil
 }

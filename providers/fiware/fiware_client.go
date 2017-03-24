@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/tomnomnom/linkheader"
+	//"github.com/tomnomnom/linkheader"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -99,253 +99,13 @@ func (g *FClient) getFiwareUser(fiwareAccessToken string) (Account, error) {
 	return fiwareAcct, nil
 }
 
-func (g *FClient) getFiwareOrgs(fiwareAccessToken string) ([]Account, error) {
-	var orgs []Account
-	url := g.getURL("ORG_INFO")
-	responses, err := g.paginateFiware(fiwareAccessToken, url)
-	if err != nil {
-		log.Errorf("Fiware getFiwareOrgs: GET url %v received error from fiware, err: %v", url, err)
-		return orgs, err
-	}
-
-	for _, response := range responses {
-		defer response.Body.Close()
-		var orgObjs []Account
-		b, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			log.Errorf("Fiware getFiwareOrgs: error reading the response from fiware, err: %v", err)
-			return orgs, err
-		}
-		if err := json.Unmarshal(b, &orgObjs); err != nil {
-			log.Errorf("Fiware getFiwareOrgs: received error unmarshalling org array, err: %v", err)
-			return orgs, err
-		}
-		for _, orgObj := range orgObjs {
-			orgs = append(orgs, orgObj)
-		}
-	}
-
-	return orgs, nil
-}
-
-func (g *FClient) getFiwareTeams(fiwareAccessToken string) ([]Account, error) {
-	var teams []Account
-	url := g.getURL("TEAMS")
-	responses, err := g.paginateFiware(fiwareAccessToken, url)
-	if err != nil {
-		log.Errorf("Fiware getFiwareTeams: GET url %v received error from fiware, err: %v", url, err)
-		return teams, err
-	}
-	for _, response := range responses {
-		defer response.Body.Close()
-		teamObjs, err := g.getTeamInfo(response)
-
-		if err != nil {
-			log.Errorf("Fiware getFiwareTeams: received error unmarshalling teams array, err: %v", err)
-			return teams, err
-		}
-		for _, teamObj := range teamObjs {
-			teams = append(teams, teamObj)
-		}
-
-	}
-	return teams, nil
-}
-
-func (g *FClient) getTeamInfo(response *http.Response) ([]Account, error) {
-	var teams []Account
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Errorf("Fiware getTeamInfo: error reading the response from fiware, err: %v", err)
-		return teams, err
-	}
-	var teamObjs []Team
-	if err := json.Unmarshal(b, &teamObjs); err != nil {
-		log.Errorf("Fiware getTeamInfo: received error unmarshalling team array, err: %v", err)
-		return teams, err
-	}
-	url := g.getURL("TEAM_PROFILE")
-	for _, team := range teamObjs {
-		teamAcct := Account{}
-		team.toFiwareAccount(url, &teamAcct)
-		teams = append(teams, teamAcct)
-	}
-
-	return teams, nil
-}
-
-func (g *FClient) getTeamByID(id string, fiwareAccessToken string) (Account, error) {
-	var teamAcct Account
-	url := g.getURL("TEAM") + id
-	response, err := g.getFromFiware(fiwareAccessToken, url)
-	if err != nil {
-		log.Errorf("Fiware getTeamByID: GET url %v received error from fiware, err: %v", url, err)
-		return teamAcct, err
-	}
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Errorf("Fiware getTeamByID: error reading the response from fiware, err: %v", err)
-		return teamAcct, err
-	}
-	var teamObj Team
-	if err := json.Unmarshal(b, &teamObj); err != nil {
-		log.Errorf("Fiware getTeamByID: received error unmarshalling team array, err: %v", err)
-		return teamAcct, err
-	}
-	url = g.getURL("TEAM_PROFILE")
-	teamObj.toFiwareAccount(url, &teamAcct)
-
-	return teamAcct, nil
-}
-
-func (g *FClient) paginateFiware(fiwareAccessToken string, url string) ([]*http.Response, error) {
-	var responses []*http.Response
-
-	response, err := g.getFromFiware(fiwareAccessToken, url)
-	if err != nil {
-		return responses, err
-	}
-	responses = append(responses, response)
-	nextURL := g.nextFiwarePage(response)
-	for nextURL != "" {
-		response, err = g.getFromFiware(fiwareAccessToken, nextURL)
-		if err != nil {
-			return responses, err
-		}
-		responses = append(responses, response)
-		nextURL = g.nextFiwarePage(response)
-	}
-
-	return responses, nil
-}
-
-func (g *FClient) nextFiwarePage(response *http.Response) string {
-	header := response.Header.Get("link")
-
-	if header != "" {
-		links := linkheader.Parse(header)
-		for _, link := range links {
-			if link.Rel == "next" {
-				return link.URL
-			}
-		}
-	}
-
-	return ""
-}
-
 func (g *FClient) getFiwareUserByName(username string, fiwareAccessToken string) (Account, error) {
-	
-	/*
-	_, err := g.getFiwareOrgByName(username, fiwareAccessToken)
-	if err == nil {
-		return Account{}, fmt.Errorf("There is a org by this name, not looking fo the user entity by name %v", username)
-	}
-	*/
-	
 	return Account{ID: username, Login: username, Name: username, AvatarURL: "", HTMLURL: ""}, nil
-
-	username = URLEncoded(username)
-	url := g.getURL("USERS") + username
-
-	resp, err := g.getFromFiware(fiwareAccessToken, url)
-	if err != nil {
-		log.Errorf("Fiware getFiwareUserByName: GET url %v received error from fiware, err: %v", url, err)
-		return Account{}, err
-	}
-	defer resp.Body.Close()
-	var fiwareAcct Account
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Errorf("Fiware getFiwareUserByName: error reading response, err: %v", err)
-		return Account{}, err
-	}
-
-	if err := json.Unmarshal(b, &fiwareAcct); err != nil {
-		log.Errorf("Fiware getFiwareUserByName: error unmarshalling response, err: %v", err)
-		return Account{}, err
-	}
-
-	return fiwareAcct, nil
-}
-
-func (g *FClient) getFiwareOrgByName(org string, fiwareAccessToken string) (Account, error) {
-
-	org = URLEncoded(org)
-	url := g.getURL("ORGS") + org
-
-	resp, err := g.getFromFiware(fiwareAccessToken, url)
-	if err != nil {
-		log.Errorf("Fiware getFiwareOrgByName: GET url %v received error from fiware, err: %v", url, err)
-		return Account{}, err
-	}
-	defer resp.Body.Close()
-	var fiwareAcct Account
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Errorf("Fiware getFiwareOrgByName: error reading response, err: %v", err)
-		return Account{}, err
-	}
-
-	if err := json.Unmarshal(b, &fiwareAcct); err != nil {
-		log.Errorf("Fiware getFiwareOrgByName: error unmarshalling response, err: %v", err)
-		return Account{}, err
-	}
-
-	return fiwareAcct, nil
 }
 
 func (g *FClient) getUserOrgByID(id string, fiwareAccessToken string) (Account, error) {
-
 	return Account{ID: id, Login: id, Name: id, AvatarURL: "", HTMLURL: ""}, nil
-
-	url := g.getURL("USER_INFO") + "/" + id
-
-	resp, err := g.getFromFiware(fiwareAccessToken, url)
-	if err != nil {
-		log.Errorf("Fiware getUserOrgById: GET url %v received error from fiware, err: %v", url, err)
-		return Account{}, err
-	}
-	defer resp.Body.Close()
-	var fiwareAcct Account
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Errorf("Fiware getUserOrgById: error reading response, err: %v", err)
-		return Account{}, err
-	}
-
-	if err := json.Unmarshal(b, &fiwareAcct); err != nil {
-		log.Errorf("Fiware getUserOrgById: error unmarshalling response, err: %v", err)
-		return Account{}, err
-	}
-
-	return fiwareAcct, nil
 }
-
-/* TODO non-exact search
-func (g *FiwareClient) searchFiware(fiwareAccessToken string, url string) []map[string]interface{} {
-	log.Debugf("url %v",url)
-	resp, err := g.getFromFiware(fiwareAccessToken, url)
-}
-
-
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> searchFiware(String url) {
-        try {
-            HttpResponse res = getFromFiware(fiwareTokenUtils.getAccessToken(), url);
-            //TODO:Finish implementing search.
-            Map<String, Object> jsonData = jsonMapper.readValue(res.getEntity().getContent());
-            return (List<Map<String, Object>>) jsonData.get("items");
-        } catch (IOException e) {
-            //TODO: Proper Error Handling.
-            return new ArrayList<>();
-        }
-    }
-
-*/
 
 //URLEncoded encodes the string
 func URLEncoded(str string) string {
@@ -417,8 +177,6 @@ func (g *FClient) getURL(endpoint string) string {
 	var hostName, apiEndpoint, toReturn string
 
 	if g.config.Hostname != "" {
-		//hostName = g.config.Scheme + g.config.Hostname
-		//apiEndpoint = g.config.Scheme + g.config.Hostname + gheAPI
 		hostName = fiwareDefaultHostName
 		apiEndpoint = fiwareAPI
 	} else {
@@ -431,24 +189,8 @@ func (g *FClient) getURL(endpoint string) string {
 		toReturn = apiEndpoint
 	case "TOKEN":
 		toReturn = hostName + "/oauth2/token"
-	case "USERS":
-		toReturn = apiEndpoint + "/users/"
-	case "ORGS":
-		toReturn = apiEndpoint + "/orgs/"
 	case "USER_INFO":
 		toReturn = apiEndpoint + "/user"
-	case "ORG_INFO":
-		toReturn = apiEndpoint + "/user/orgs?per_page=1"
-	case "USER_PICTURE":
-		toReturn = "https://avatars.fiwareusercontent.com/u/" + endpoint + "?v=3&s=72"
-	case "USER_SEARCH":
-		toReturn = apiEndpoint + "/search/users?q="
-	case "TEAM":
-		toReturn = apiEndpoint + "/teams/"
-	case "TEAMS":
-		toReturn = apiEndpoint + "/user/teams?per_page=100"
-	case "TEAM_PROFILE":
-		toReturn = hostName + "/orgs/%s/teams/%s"
 	default:
 		toReturn = apiEndpoint
 	}
