@@ -22,6 +22,8 @@ type Githubconfig struct {
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 
 	Scheme string `json:"scheme,omitempty" yaml:"scheme,omitempty"`
+	
+	RedirectURI string `json:"redirectURI,omitempty" yaml:"redirectURI,omitempty"`
 }
 
 type GithubconfigCollection struct {
