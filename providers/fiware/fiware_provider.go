@@ -20,7 +20,7 @@ const (
 	schemeSetting                  = "api.fiware.scheme"
 	clientIDSetting                = "api.auth.fiware.client.id"
 	clientSecretSetting            = "api.auth.fiware.client.secret"
-	redirectURISetting             = "api.auth.fiware.redirectURI"
+	redirectURISetting             = "api.auth.fiware.redirecturi"
 	fiwareAccessModeSetting        = "api.auth.fiware.access.mode"
 	fiwareAllowedIdentitiesSetting = "api.auth.fiware.allowed.identities"
 )
