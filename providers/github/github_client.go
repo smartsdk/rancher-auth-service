@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"encoding/base64"
 
 	"github.com/rancher/rancher-auth-service/model"
 )
@@ -19,8 +18,8 @@ import (
 const (
 	gheAPI                = "/api/v3"
 	githubAccessToken     = Name + "access_token"
-	githubAPI             = "https://account.lab.fiware.org"
-	githubDefaultHostName = "https://account.lab.fiware.org"
+	githubAPI             = "https://api.github.com"
+	githubDefaultHostName = "https://github.com"
 )
 
 //GClient implements a httpclient for github
@@ -34,8 +33,6 @@ func (g *GClient) getAccessToken(code string) (string, error) {
 	form.Add("client_id", g.config.ClientID)
 	form.Add("client_secret", g.config.ClientSecret)
 	form.Add("code", code)
-	form.Add("grant_type", "authorization_code")
-	form.Add("redirect_uri", g.config.Scheme + g.config.Hostname)
 
 	url := g.getURL("TOKEN")
 
@@ -45,7 +42,6 @@ func (g *GClient) getAccessToken(code string) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	log.Errorf("Received resp to getAccessCode: %v", resp)
 
 	// Decode the response
 	var respMap map[string]interface{}
@@ -83,8 +79,7 @@ func (g *GClient) getGithubUser(githubAccessToken string) (Account, error) {
 	}
 	defer resp.Body.Close()
 	var githubAcct Account
-	
-	log.Errorf("Received resp to getGithubUser: %v", resp)
+
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Github getGithubUser: error reading response, err: %v", err)
@@ -235,15 +230,11 @@ func (g *GClient) nextGithubPage(response *http.Response) string {
 }
 
 func (g *GClient) getGithubUserByName(username string, githubAccessToken string) (Account, error) {
-	
-	/*
+
 	_, err := g.getGithubOrgByName(username, githubAccessToken)
 	if err == nil {
 		return Account{}, fmt.Errorf("There is a org by this name, not looking fo the user entity by name %v", username)
 	}
-	*/
-	
-	return Account{ID: username, Login: username, Name: username, AvatarURL: "", HTMLURL: ""}, nil
 
 	username = URLEncoded(username)
 	url := g.getURL("USERS") + username
@@ -298,8 +289,6 @@ func (g *GClient) getGithubOrgByName(org string, githubAccessToken string) (Acco
 }
 
 func (g *GClient) getUserOrgByID(id string, githubAccessToken string) (Account, error) {
-
-	return Account{ID: id, Login: id, Name: id, AvatarURL: "", HTMLURL: ""}, nil
 
 	url := g.getURL("USER_INFO") + "/" + id
 
@@ -363,11 +352,8 @@ func (g *GClient) postToGithub(url string, form url.Values) (*http.Response, err
 		log.Error(err)
 	}
 	req.PostForm = form
-	auth := base64.StdEncoding.EncodeToString([]byte(g.config.ClientID+":"+g.config.ClientSecret))
-	req.Header.Add("Authorization", "Basic "+auth)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Accept", "application/json")
-	log.Error("Doing post request: %v", req)
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		log.Errorf("Received error from github: %v", err)
@@ -387,13 +373,13 @@ func (g *GClient) postToGithub(url string, form url.Values) (*http.Response, err
 }
 
 func (g *GClient) getFromGithub(githubAccessToken string, url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url+"?access_token="+githubAccessToken, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Error(err)
 	}
+	req.Header.Add("Authorization", "token "+githubAccessToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36)")
-	log.Errorf("Doing get request: %v", req)
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		log.Errorf("Received error from github: %v", err)
@@ -417,10 +403,8 @@ func (g *GClient) getURL(endpoint string) string {
 	var hostName, apiEndpoint, toReturn string
 
 	if g.config.Hostname != "" {
-		//hostName = g.config.Scheme + g.config.Hostname
-		//apiEndpoint = g.config.Scheme + g.config.Hostname + gheAPI
-		hostName = githubDefaultHostName
-		apiEndpoint = githubAPI
+		hostName = g.config.Scheme + g.config.Hostname
+		apiEndpoint = g.config.Scheme + g.config.Hostname + gheAPI
 	} else {
 		hostName = githubDefaultHostName
 		apiEndpoint = githubAPI
@@ -430,7 +414,7 @@ func (g *GClient) getURL(endpoint string) string {
 	case "API":
 		toReturn = apiEndpoint
 	case "TOKEN":
-		toReturn = hostName + "/oauth2/token"
+		toReturn = hostName + "/login/oauth/access_token"
 	case "USERS":
 		toReturn = apiEndpoint + "/users/"
 	case "ORGS":

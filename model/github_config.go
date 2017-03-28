@@ -9,5 +9,4 @@ type GithubConfig struct {
 	Scheme       string `json:"scheme"`
 	ClientID     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
-	RedirectURI  string `json:"redirectURI"`
 }

@@ -20,7 +20,6 @@ const (
 	schemeSetting                  = "api.github.scheme"
 	clientIDSetting                = "api.auth.github.client.id"
 	clientSecretSetting            = "api.auth.github.client.secret"
-	redirectURISetting             = "api.auth.github.redirectURI"
 	githubAccessModeSetting        = "api.auth.github.access.mode"
 	githubAllowedIdentitiesSetting = "api.auth.github.allowed.identities"
 )
@@ -65,7 +64,6 @@ func (g *GProvider) GenerateToken(json map[string]string) (model.Token, error) {
 		log.Debugf("GitHubIdentityProvider GenerateToken called for securityCode %v", securityCode)
 		accessToken, err := g.githubClient.getAccessToken(securityCode)
 		if err != nil {
-			log.Errorf("Error with %v", securityCode)
 			log.Errorf("Error generating accessToken from github %v", err)
 			return model.Token{}, err
 		}
@@ -132,7 +130,6 @@ func (g *GProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 		userAcct.toIdentity(UserType, &userIdentity)
 		identities = append(identities, userIdentity)
 	}
-	/*
 	orgAccts, err := g.githubClient.getGithubOrgs(accessToken)
 	if err == nil {
 		for _, orgAcct := range orgAccts {
@@ -153,7 +150,6 @@ func (g *GProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 			identities = append(identities, teamIdentity)
 		}
 	}
-	*/
 
 	return identities, nil
 }
@@ -175,7 +171,7 @@ func (g *GProvider) GetIdentity(externalID string, externalIDType string, access
 		githubAcct.toIdentity(externalIDType, &identity)
 		return identity, nil
 	case TeamType:
-		githubAcct, err := g.githubClient.getUserOrgByID(externalID, accessToken)
+		githubAcct, err := g.githubClient.getTeamByID(externalID, accessToken)
 		if err != nil {
 			return identity, err
 		}
@@ -200,7 +196,7 @@ func (g *GProvider) SearchIdentities(name string, exactMatch bool, accessToken s
 
 		identities = append(identities, userIdentity)
 	}
-	/*
+
 	orgAcct, err := g.githubClient.getGithubOrgByName(name, accessToken)
 	if err == nil {
 		orgIdentity := client.Identity{Resource: client.Resource{
@@ -210,7 +206,6 @@ func (g *GProvider) SearchIdentities(name string, exactMatch bool, accessToken s
 
 		identities = append(identities, orgIdentity)
 	}
-	*/
 
 	return identities, nil
 }
@@ -251,7 +246,6 @@ func (g *GProvider) GetSettings() map[string]string {
 	if g.githubClient.config.ClientSecret != "" {
 		settings[clientSecretSetting] = g.githubClient.config.ClientSecret
 	}
-	settings[redirectURISetting] = g.githubClient.config.RedirectURI
 	return settings
 }
 
@@ -264,7 +258,6 @@ func (g *GProvider) GetProviderSettingList(listOnly bool) []string {
 	if !listOnly {
 		settings = append(settings, clientSecretSetting)
 	}
-	settings = append(settings, redirectURISetting)
 	return settings
 }
 
@@ -277,7 +270,6 @@ func (g *GProvider) AddProviderConfig(authConfig *model.AuthConfig, providerSett
 	githubConfig.Scheme = providerSettings[schemeSetting]
 	githubConfig.ClientID = providerSettings[clientIDSetting]
 	githubConfig.ClientSecret = providerSettings[clientSecretSetting]
-	githubConfig.RedirectURI = providerSettings[redirectURISetting]
 
 	authConfig.GithubConfig = githubConfig
 }
@@ -294,12 +286,11 @@ func (g *GProvider) GetLegacySettings() map[string]string {
 func (g *GProvider) GetRedirectURL() string {
 	redirect := ""
 	if g.githubClient.config.Hostname != "" {
-		//redirect = g.githubClient.config.Scheme + g.githubClient.config.Hostname
-		redirect = githubDefaultHostName
+		redirect = g.githubClient.config.Scheme + g.githubClient.config.Hostname
 	} else {
 		redirect = githubDefaultHostName
 	}
-	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.githubClient.config.ClientID + "&redirect_uri=" + g.githubClient.config.Scheme + g.githubClient.config.Hostname
+	redirect = redirect + "/login/oauth/authorize?client_id=" + g.githubClient.config.ClientID + "&scope=read:org"
 
 	return redirect
 }
