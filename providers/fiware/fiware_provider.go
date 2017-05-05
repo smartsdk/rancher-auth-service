@@ -131,6 +131,13 @@ func (g *FProvider) GetIdentities(accessToken string) ([]client.Identity, error)
 		}}
 		userAcct.toIdentity(UserType, &userIdentity)
 		identities = append(identities, userIdentity)
+		for _, org := range userAcct.Organizations {
+			orgIdentity := client.Identity{Resource: client.Resource{
+				Type: "identity",
+			}}
+			org.toIdentity(OrgType, &orgIdentity)
+			identities = append(identities, orgIdentity)
+		}
 	}
 
 	return identities, nil

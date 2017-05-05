@@ -12,6 +12,11 @@ type Account struct {
 	Name      string `json:"displayName,omitempty"`
 	AvatarURL string `json:"avatar_url,omitempty"`
 	HTMLURL   string `json:"html_url,omitempty"`
+	Organizations []Org `json:"organizations,omitempty"`
+}
+
+type Org struct {
+	Name string `json:"name,omitempty"`
 }
 
 func (a *Account) toIdentity(externalIDType string, identity *client.Identity) {
@@ -26,6 +31,18 @@ func (a *Account) toIdentity(externalIDType string, identity *client.Identity) {
 	identity.Login = a.Login
 	identity.ProfilePicture = a.AvatarURL
 	identity.ProfileUrl = a.HTMLURL
+}
+
+func (o *Org) toIdentity(externalIDType string, identity *client.Identity) {
+	identity.ExternalId = o.Name
+	identity.Resource.Id = externalIDType + ":" + o.Name
+	identity.ExternalIdType = externalIDType
+	if o.Name != "" {
+		identity.Name = o.Name
+	} else {
+		identity.Name = ""
+	}
+	identity.Login = o.Name
 }
 
 //Team defines properties a team on fiware has
