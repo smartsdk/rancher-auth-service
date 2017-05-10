@@ -3,6 +3,9 @@ package fiware
 import (
 	"fmt"
 	"github.com/rancher/go-rancher/client"
+	"strings"
+	"crypto/md5"
+	"encoding/hex"
 )
 
 //Account defines properties an account on fiware has
@@ -10,6 +13,7 @@ type Account struct {
 	ID        string    `json:"id,omitempty"`
 	Login     string `json:"login,omitempty"`
 	Name      string `json:"displayName,omitempty"`
+	Email     string `json:"email,omitempty"`
 	AvatarURL string `json:"avatar_url,omitempty"`
 	HTMLURL   string `json:"html_url,omitempty"`
 	Organizations []Org `json:"organizations,omitempty"`
@@ -29,7 +33,7 @@ func (a *Account) toIdentity(externalIDType string, identity *client.Identity) {
 		identity.Name = a.Login
 	}
 	identity.Login = a.Login
-	identity.ProfilePicture = a.AvatarURL
+	identity.ProfilePicture = getGravatarImage(a.Email)
 	identity.ProfileUrl = a.HTMLURL
 }
 
@@ -43,6 +47,15 @@ func (o *Org) toIdentity(externalIDType string, identity *client.Identity) {
 		identity.Name = ""
 	}
 	identity.Login = o.Name
+}
+
+func getGravatarImage(email string) string {
+	gravHash := strings.TrimSpace(email)
+	gravHash = strings.ToLower(gravHash)
+	hasher := md5.New()
+    hasher.Write([]byte(gravHash))
+	gravHash = hex.EncodeToString(hasher.Sum(nil))
+	return("https://www.gravatar.com/avatar/"+gravHash)
 }
 
 //Team defines properties a team on fiware has
