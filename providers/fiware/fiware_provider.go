@@ -266,7 +266,8 @@ func (g *FProvider) GetRedirectURL() string {
 	} else {
 		redirect = fiwareDefaultHostName
 	}
-	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.fiwareClient.config.ClientID + "&redirect_uri=" + g.fiwareClient.config.RedirectURI
+	//redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.fiwareClient.config.ClientID + "&redirect_uri=" + g.fiwareClient.config.RedirectURI
+	redirect = redirect + "/oauth2/authorize?response_type=code&client_id=" + g.fiwareClient.config.ClientID
 
 	return redirect
 }
