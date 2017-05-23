@@ -3,5 +3,10 @@ language: go
 go:
   - master
 
+sudo: required
+
+services:
+  - docker
+
 install:
   - make build
