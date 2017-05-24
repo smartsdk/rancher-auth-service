@@ -9,7 +9,7 @@ install:
   - tar cvJf ./bin/rancher-auth-service.tar.xz ./bin/rancher-auth-service
   - cp ./bin/rancher-auth-service.tar.xz ./dist/artifacts/
 script:
-  - echo "Built release"
+  - echo "Built"
 deploy:
   provider: releases
   skip_cleanup: true
