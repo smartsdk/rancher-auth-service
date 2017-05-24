@@ -1,15 +1,21 @@
 language: go
-
 go:
   - master
-
 sudo: required
-
 services:
   - docker
-
 install:
   - make build
-
+  - tar cvJf ./bin/rancher-auth-service.tar.xz ./bin/rancher-auth-service
+  - cp ./bin/rancher-auth-service.tar.xz ./dist/artifacts/
 script:
   - echo "Built"
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: rhhhNTlHJ6C89t43cpqWSp2KvpFJ7CtQAhhhch4CC01Iu6EGn3K0fcA1TUl98S7kLuhzkv58QKgZH58Px4KwPIR9Jn+bnuU5ZdJzQDRgzzmyNP650YgHtdhTj9HSSn/v/SbXDYsVskS1pxFwbLwp8QJfaMQbm+lpA9lVv/hrkkHYjsNPSN2MrSFRoirEQ8mWpiv0HphLV2683qgqvEGMIE7vv1lw+SLUTl7huTcLtQsltH9vEm3T4HmlPvWLu/YO/1kf+DYjuRmY6yj3jPtKORkGRuPe9tNVSxNBqlhvtBYZe/aufNI4N76jeMkGZlFNxJ0fGQbgflxJmHHR4KlE5RRf/Lxk/h2xm0bmsRWfDCXcH45W3b9P3xGHXc4sutoiiMNgWym+jKdJ7/9B3lBzSdmT3VK89Enl9Qly0rfOhf9yrakudvNx5kGBjVX5mjPdMMORROLfY1UbFYqK8AJI3PmrohHtTFgKXs7Q7gDXAR0GhapicYxiznhuVxfazGHngxUHe9SesgsNkjpIxo9iPg1TXtZ4WpYnPxnBwMX9OweCcwf6YL3ZSOFVsyhru17fUOShjn38ulNoHiO1MaKiTWto9mSdOD50q0fE/T/faRKToh+ZzoI6wcgya4hNKGBYPTr8hXkEEyCKRJsVJC1VisN9dnkenqCE8VqWfSVzMk8=
+  file: ./dist/artifacts/rancher-auth-service.tar.xz
+  on:
+    tags: true
+    repo: Cerfoglg/rancher-auth-service
