@@ -6,6 +6,7 @@ import (
 	"github.com/rancher/rancher-auth-service/model"
 	"github.com/rancher/rancher-auth-service/providers/github"
 	ad "github.com/rancher/rancher-auth-service/providers/ldap/ad"
+	"github.com/rancher/rancher-auth-service/providers/fiware"
 	"github.com/rancher/rancher-auth-service/providers/shibboleth"
 )
 
@@ -44,6 +45,8 @@ type IdentityProvider interface {
 //GetProvider returns an instance of an identyityProvider by name
 func GetProvider(name string) (IdentityProvider, error) {
 	switch name {
+	case "fiwareconfig":
+		return fiware.InitializeProvider()
 	case "githubconfig":
 		return github.InitializeProvider()
 	case "shibbolethconfig":
@@ -63,6 +66,8 @@ func IsProviderSupported(name string) bool {
 	case "shibbolethconfig":
 		return true
 	case "ldapconfig":
+		return true
+	case "fiwareconfig":
 		return true
 	default:
 		return false
