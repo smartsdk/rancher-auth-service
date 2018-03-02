@@ -3,7 +3,7 @@ package fiware
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/rancher/go-rancher/client"
+	"github.com/rancher/go-rancher/v2"
 	"github.com/rancher/rancher-auth-service/model"
 	"net/http"
 )
