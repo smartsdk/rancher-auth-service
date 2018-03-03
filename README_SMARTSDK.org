@@ -1,0 +1,23 @@
+* Intro
+
+This is a fork of rancher project to be used as the SmartkSDK platform
+manager.
+
+The software is running at: https://platform-manager.smartsdk.eu/.
+
+You can login using your FIWARE Lab credentials:
+https://account.lab.fiware.org/.
+
+* Development
+
+The artifacts are build by a local CI/CD system using gitlab and
+gitlab-ci.
+
+Our branches are named after the upstream name by appending
+=-smartsdk-dev=.
+
+Our tags are named after the upstream name by appending =-smartsdk=.
+
+For example staring from the upstream version: =v0.4.24= we may have a
+branch named =v0.4.24-smartsdk-dev= and a tag named
+=v0.4.24-smartsdk=.

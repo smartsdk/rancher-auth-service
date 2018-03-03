@@ -1,0 +1,33 @@
+# When using dind, it's wise to use the overlayfs driver for
+# improved performance.
+variables:
+  DOCKER_DRIVER: overlay2
+
+image:
+  name: docker
+
+stages:
+  - compile
+  - upload
+
+compile:
+  stage: compile
+  services:
+    - docker:dind
+  before_script:
+    - docker info
+  script:
+    - apk add --update make curl xz
+    - make build
+    - cd bin && tar cvJf rancher-auth-service.tar.xz rancher-auth-service
+    # Move artifacts to our custom dir
+    - mkdir -p "${CI_PROJECT_DIR}/compile_artifacts"
+    - mv rancher-auth-service.tar.xz "${CI_PROJECT_DIR}/compile_artifacts"
+  artifacts:
+    paths:
+      - compile_artifacts
+
+upload:
+  stage: upload
+  script:
+  - ./.uploader
