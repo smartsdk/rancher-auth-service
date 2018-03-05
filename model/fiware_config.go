@@ -1,6 +1,6 @@
 package model
 
-import "github.com/rancher/go-rancher/client"
+import "github.com/rancher/go-rancher/v2"
 
 //FiwareConfig stores the fiware config read from JSON file
 type FiwareConfig struct {

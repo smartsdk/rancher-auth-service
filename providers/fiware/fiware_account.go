@@ -2,7 +2,7 @@ package fiware
 
 import (
 	"fmt"
-	"github.com/rancher/go-rancher/client"
+	"github.com/rancher/go-rancher/v2"
 	"strings"
 	"crypto/md5"
 	"encoding/hex"

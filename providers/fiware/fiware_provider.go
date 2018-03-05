@@ -3,6 +3,7 @@ package fiware
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	v1client "github.com/rancher/go-rancher/client"
 	"github.com/rancher/go-rancher/v2"
 	"github.com/rancher/rancher-auth-service/model"
 	"net/http"
@@ -29,7 +30,7 @@ func init() {
 }
 
 //InitializeProvider returns a new instance of the provider
-func InitializeProvider() *FProvider {
+func InitializeProvider() (*FProvider, error) {
 	client := &http.Client{}
 	fiwareClient := &FClient{}
 	fiwareClient.httpClient = client
@@ -37,7 +38,7 @@ func InitializeProvider() *FProvider {
 	fiwareProvider := &FProvider{}
 	fiwareProvider.fiwareClient = fiwareClient
 
-	return fiwareProvider
+	return fiwareProvider, nil
 }
 
 //FProvider implements an IdentityProvider for fiware
@@ -56,10 +57,11 @@ func (g *FProvider) GetUserType() string {
 }
 
 //GenerateToken authenticates the given code and returns the token
-func (g *FProvider) GenerateToken(json map[string]string) (model.Token, error) {
+func (g *FProvider) GenerateToken(json map[string]string) (model.Token, int, error) {
 	//getAccessToken
 	securityCode := json["code"]
 	accessToken := json["accessToken"]
+	status := 0
 
 	if securityCode != "" {
 		log.Debugf("GitHubIdentityProvider GenerateToken called for securityCode %v", securityCode)
@@ -67,18 +69,19 @@ func (g *FProvider) GenerateToken(json map[string]string) (model.Token, error) {
 		if err != nil {
 			log.Errorf("Error with %v", securityCode)
 			log.Errorf("Error generating accessToken from fiware %v", err)
-			return model.Token{}, err
+			return model.Token{}, status, err
 		}
 		log.Debugf("Received AccessToken from fiware %v", accessToken)
 		return g.createToken(accessToken)
 	} else if accessToken != "" {
 		return g.createToken(accessToken)
 	} else {
-		return model.Token{}, fmt.Errorf("Cannot gerenate token from fiware, invalid request data")
+		return model.Token{}, status, fmt.Errorf("Cannot gerenate token from fiware, invalid request data")
 	}
 }
 
-func (g *FProvider) createToken(accessToken string) (model.Token, error) {
+func (g *FProvider) createToken(accessToken string) (model.Token, int, error) {
+	status := 0
 	var token = model.Token{Resource: client.Resource{
 		Type: "token",
 	}}
@@ -87,17 +90,17 @@ func (g *FProvider) createToken(accessToken string) (model.Token, error) {
 	identities, err := g.GetIdentities(accessToken)
 	if err != nil {
 		log.Errorf("Error getting identities using accessToken from fiware %v", err)
-		return model.Token{}, err
+		return model.Token{}, status, err
 	}
 	token.IdentityList = identities
 	token.Type = TokenType
 	user, ok := GetUserIdentity(identities, UserType)
 	if !ok {
 		log.Error("User identity not found using accessToken from fiware")
-		return model.Token{}, fmt.Errorf("User identity not found using accessToken from fiware")
+		return model.Token{}, status, fmt.Errorf("User identity not found using accessToken from fiware")
 	}
 	token.ExternalAccountID = user.ExternalId
-	return token, nil
+	return token, status, nil
 }
 
 //GetUserIdentity returns the "user" from the list of identities
@@ -111,13 +114,13 @@ func GetUserIdentity(identities []client.Identity, userType string) (client.Iden
 }
 
 //RefreshToken re-authenticates and generate a new token
-func (g *FProvider) RefreshToken(json map[string]string) (model.Token, error) {
+func (g *FProvider) RefreshToken(json map[string]string) (model.Token, int, error) {
 	accessToken := json["accessToken"]
 	if accessToken != "" {
 		log.Debugf("GitHubIdentityProvider RefreshToken called for accessToken %v", accessToken)
 		return g.createToken(accessToken)
 	}
-	return model.Token{}, fmt.Errorf("Cannot refresh token from fiware, no access token found in request")
+	return model.Token{}, 0, fmt.Errorf("Cannot refresh token from fiware, no access token found in request")
 }
 
 //GetIdentities returns list of user and group identities associated to this token
@@ -275,4 +278,26 @@ func (g *FProvider) GetRedirectURL() string {
 //GetIdentitySeparator returns the provider specific separator to use to separate allowedIdentities
 func (g *FProvider) GetIdentitySeparator() string {
 	return ","
+}
+
+func (g *FProvider) TestLogin(testAuthConfig *model.TestAuthConfig, accessToken string, originalLogin string) (int, error) {
+	return 0, nil
+}
+
+func (g *FProvider) GetProviderConfigResource() interface{} {
+	return model.FiwareConfig{}
+}
+
+func (g *FProvider) CustomizeSchema(schema *v1client.Schema) *v1client.Schema {
+	return schema
+}
+
+func (g *FProvider) GetProviderSecretSettings() []string {
+	var settings []string
+	settings = append(settings, clientSecretSetting)
+	return settings
+}
+
+func (g *FProvider) IsIdentityLookupSupported() bool {
+	return true
 }
